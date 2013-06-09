@@ -21,12 +21,14 @@ public class AppRating {
         final int launchCount = prefs.getInt(LAUNCH_COUNT, 0) + 1;
         final int threshold = prefs.getInt(THRESHOLD, launchesUntilPrompt);
         editor.putInt(LAUNCH_COUNT, launchCount);
-        if (launchCount == threshold) {
+        if (launchCount >= threshold) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(context);
     		builder.setTitle("Like " + appName + "?")
     			   .setCancelable(true)
     			   .setPositiveButton("Rate It Now", new DialogInterface.OnClickListener() {
     		           public void onClick(DialogInterface dialog, int id) {
+    		        	    editor.putBoolean(DONT_SHOW, true);
+   		        	   		editor.commit();
     		        	   	context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName)));
     		                dialog.cancel();
     		           }

@@ -649,15 +649,23 @@ public class StorageManager {
 	} 
 	
 	public File zipBuffered(int buffer) {
-		return zipBufferedHelper(_root, buffer);
+		return zipBufferedHelper(_root, buffer, null);
+	}
+	
+	public File zipBuffered(int buffer, FileFilter filter) {
+		return zipBufferedHelper(_root, buffer, filter);
 	}
 	
 	public File zipBuffered(File inputDir, int buffer) {
-		return zipBufferedHelper(inputDir, buffer);
+		return zipBufferedHelper(inputDir, buffer, null);
+	}
+	
+	public File zipBuffered(File inputDir, int buffer, FileFilter filter) {
+		return zipBufferedHelper(inputDir, buffer, filter);
 	}
 	
 	//Uses a buffer to conserver memory
-	private File zipBufferedHelper(File inputDir, int buffer) { 
+	private File zipBufferedHelper(File inputDir, int buffer, FileFilter filter) { 
 		//What if file exists
 		if (!inputDir.isDirectory()) {
 			Log.e(TAG, "The input is not a directory");
@@ -667,7 +675,7 @@ public class StorageManager {
 		ZipOutputStream zipStream = null;
 		try {  	
 			zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
-			zipBufferedRecursively(inputDir, inputDir, zipStream, buffer);
+			zipBufferedRecursively(inputDir, inputDir, zipStream, buffer, filter);
 			zipStream.close(); 
 		} catch (IOException e) {
 			Log.e(TAG, e.toString());
@@ -682,11 +690,15 @@ public class StorageManager {
 		return zipFile;
 	}
 	
-	private void zipBufferedRecursively(File file, File base, ZipOutputStream zipStream, int buffer) throws IOException {
+	private void zipBufferedRecursively(File file, File base, ZipOutputStream zipStream, int buffer, FileFilter filter) throws IOException {
 		if (file.isDirectory()) {
-			File[] files = listFilesAndDirectories(file); 
+			File[] files;
+			if (filter == null)
+				files = listFilesAndDirectories(file);
+			else
+				files = list(file, filter);
 			for(int i=0; i < files.length; i++) { 
-				zipBufferedRecursively(files[i], base, zipStream, buffer);
+				zipBufferedRecursively(files[i], base, zipStream, buffer, filter);
 			}
 		}
 		else {

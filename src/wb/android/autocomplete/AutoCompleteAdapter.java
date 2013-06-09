@@ -14,15 +14,15 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
 
 	private final AutoCompleteQueriable queriable;
 	private final CharSequence tag;
+	private String last; 
 	private Cursor cursor;
-	private final Activity activity;
 	
 	private AutoCompleteAdapter(Activity activity, Cursor cursor, AutoCompleteQueriable queriable, CharSequence tag) {
 		super(activity, cursor);
-		this.activity = activity;
 		this.cursor = cursor;
 		this.queriable = queriable;
 		this.tag = tag;
+		this.last = "";
 	}
 	
 	public static AutoCompleteAdapter getInstance(Activity activity, AutoCompleteQueriable queriable, CharSequence tag) {
@@ -41,7 +41,13 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		String text = cursor.getString(0);
-		((TextView) view).setText(text);
+		if (text.trim().equalsIgnoreCase(last.trim())) {
+			view.getRootView().setVisibility(View.INVISIBLE);
+		}
+		else {
+			((TextView) view).setText(text);
+			view.getRootView().setVisibility(View.VISIBLE);
+		}
 	}
 
 	@Override
@@ -62,8 +68,8 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
     public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
         if (getFilterQueryProvider() != null)
             return getFilterQueryProvider().runQuery(constraint);
-        String input = (constraint == null) ? "" : constraint.toString();
-        return queriable.getAutoCompleteCursor(input, tag);
+        last = (constraint == null) ? "" : constraint.toString();
+        return queriable.getAutoCompleteCursor(last, tag);
     }
 
 }

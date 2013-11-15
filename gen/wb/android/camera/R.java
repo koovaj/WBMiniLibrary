@@ -109,7 +109,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:dragndrop_background
+          @attr name wb.android.camera:dragndrop_background
         */
         public static final int TouchListView_dragndrop_background = 3;
         /**
@@ -125,7 +125,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:expanded_height
+          @attr name wb.android.camera:expanded_height
         */
         public static final int TouchListView_expanded_height = 1;
         /**
@@ -135,7 +135,7 @@ containing a value of this type.
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name android:grabber
+          @attr name wb.android.camera:grabber
         */
         public static final int TouchListView_grabber = 2;
         /**
@@ -151,7 +151,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:normal_height
+          @attr name wb.android.camera:normal_height
         */
         public static final int TouchListView_normal_height = 0;
         /**
@@ -171,7 +171,7 @@ containing a value of this type.
 <tr><td><code>slideRight</code></td><td>1</td><td></td></tr>
 <tr><td><code>slideLeft</code></td><td>2</td><td></td></tr>
 </table>
-          @attr name android:remove_mode
+          @attr name wb.android.camera:remove_mode
         */
         public static final int TouchListView_remove_mode = 4;
     };

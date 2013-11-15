@@ -286,6 +286,10 @@ public class StorageManager {
 	}
 	
 	public boolean writeBitmap(final Uri imageUri, final Bitmap bitmap, final CompressFormat format, int quality) {
+		if (imageUri == null || bitmap == null || format == null) {
+			Log.e(TAG, "Invalid parameters - cannot supply null values to writeBitmap method");
+			return false;
+		}
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(imageUri.getPath());

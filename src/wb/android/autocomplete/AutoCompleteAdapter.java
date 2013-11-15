@@ -6,23 +6,28 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
+import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
+import android.widget.ListView;
 import android.widget.TextView;
 
-public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
+public class AutoCompleteAdapter extends CursorAdapter implements Filterable, FilterQueryProvider {
 
 	private final AutoCompleteQueriable queriable;
 	private final CharSequence tag;
 	private String last; 
-	private Cursor cursor;
+	private MyClickListener myClickListener;
 	
 	private AutoCompleteAdapter(Activity activity, Cursor cursor, AutoCompleteQueriable queriable, CharSequence tag) {
 		super(activity, cursor);
-		this.cursor = cursor;
 		this.queriable = queriable;
 		this.tag = tag;
 		this.last = "";
+		setFilterQueryProvider(this);
+		this.myClickListener = new MyClickListener();
+		
 	}
 	
 	public static AutoCompleteAdapter getInstance(Activity activity, AutoCompleteQueriable queriable, CharSequence tag) {
@@ -30,12 +35,16 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
 		return new AutoCompleteAdapter(activity, cursor, queriable, tag);
 	}
 	
-	public final void onPause() {
-		cursor.close();
+	public void reset() {
+		this.last = "";
+		onPause();
 	}
 	
-	public final void onResume() {
-		cursor = queriable.getAutoCompleteCursor("", tag);
+	public final void onPause() {
+		Cursor cursor = getCursor();
+		if (cursor != null && !cursor.isClosed()) {
+			cursor.close();
+		}
 	}
 
 	@Override
@@ -53,6 +62,9 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		final LayoutInflater inflater = LayoutInflater.from(context);
+		if (parent instanceof ListView) { // Should always be the case (but to prevent against updates, etc)
+			((ListView) parent).setOnItemClickListener(myClickListener);
+		}
         final TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
         String item = cursor.getString(0);
         view.setText(item);
@@ -64,12 +76,19 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable {
 		return cursor.getString(0);
 	}
 	
+	private class MyClickListener implements AdapterView.OnItemClickListener {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			queriable.onItemSelected(((TextView)view).getText(), tag);
+		}
+		
+	}
+
 	@Override
-    public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-        if (getFilterQueryProvider() != null)
-            return getFilterQueryProvider().runQuery(constraint);
-        last = (constraint == null) ? "" : constraint.toString();
+	public Cursor runQuery(CharSequence constraint) {
+		last = (constraint == null) ? "" : constraint.toString();
         return queriable.getAutoCompleteCursor(last, tag);
-    }
+	}
 
 }

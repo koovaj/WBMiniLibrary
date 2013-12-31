@@ -18,11 +18,11 @@ class FlexView {
 	private final FlexViews.Element element;
 	
 	//View Tags
+	@SuppressWarnings("unused")
 	private String android_checked, android_layout_height, android_layout_weight, android_layout_width, android_id, android_tag, android_visibility;
 	
 	//Cached from Tags
 	private LinearLayout.LayoutParams params;
-	private boolean checked;
 	
 	//EditText Tags
 	private String android_hint;
@@ -100,7 +100,7 @@ class FlexView {
 	private static final String MATCH_PARENT = "match_parent"; //Deprecated
 	private int getLayoutInt(String param) throws FlexFailedException {
 		if (param.equalsIgnoreCase(FILL_PARENT) || param.equalsIgnoreCase(MATCH_PARENT))
-			return LayoutParams.FILL_PARENT;
+			return LayoutParams.MATCH_PARENT;
 		else if (param.equalsIgnoreCase(WRAP_CONTENT))
 			return LayoutParams.WRAP_CONTENT;
 		else {

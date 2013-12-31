@@ -10,6 +10,7 @@ import android.util.Log;
 class FlexStrings {
 
 	private static final String TAG = "FlexStrings";
+	@SuppressWarnings("unused")
 	private static final boolean D = Flex.D;
 	
 	private boolean open;

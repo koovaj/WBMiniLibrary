@@ -1,14 +1,14 @@
 package wb.android.async;
 
-import android.app.Activity;
+import android.content.Context;
 
 public abstract class BooleanProgressTask<T> extends ProgressTask<T, Boolean>{
 
 	private final BooleanTaskCompleteDelegate delegate;
 	private final int taskID;
 	
-	public BooleanProgressTask(Activity activity, BooleanTaskCompleteDelegate delegate, String progressMessage, int taskID) {
-		super(activity, progressMessage, true);
+	public BooleanProgressTask(Context context, BooleanTaskCompleteDelegate delegate, String progressMessage, int taskID) {
+		super(context, progressMessage, true);
 		this.delegate = delegate;
 		this.taskID = taskID;
 	}

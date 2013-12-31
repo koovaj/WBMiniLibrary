@@ -17,7 +17,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -40,40 +41,40 @@ public class StorageManager {
 		_root = root;
 	}
 	
-	public static StorageManager getInstance(Activity activity) {
+	public static StorageManager getInstance(Context context) {
 		if (_externalInstance != null)
 			return _externalInstance;
 		try {
-			_externalInstance = new SDCardFileManager(activity);
+			_externalInstance = new SDCardFileManager(context);
 			return _externalInstance;
 		} catch (SDCardStateException e) {
 			if (_internalInstance != null)
 				return _internalInstance;
 			else {
-				_internalInstance = new InternalStorageManager(activity);
+				_internalInstance = new InternalStorageManager(context);
 				return _internalInstance;
 			}
 		}
 	}
 	
-	public static final SDCardFileManager getExternalInstance(Activity activity) throws SDCardStateException {
+	public static final SDCardFileManager getExternalInstance(Context context) throws SDCardStateException {
 		if (_externalInstance != null)
 			return _externalInstance;
-		_externalInstance = new SDCardFileManager(activity);
+		_externalInstance = new SDCardFileManager(context);
 		return _externalInstance;
 	}
 	
-	public static final SDCardFileManager getExternalInstance(Activity activity, String[] allowedStates) throws SDCardStateException {
+	public static final SDCardFileManager getExternalInstance(Context context, String[] allowedStates) throws SDCardStateException {
 		if (_externalInstance != null)
 			return _externalInstance;
-		_externalInstance = new SDCardFileManager(activity, allowedStates);
+		_externalInstance = new SDCardFileManager(context, allowedStates);
 		return _externalInstance;
 	}
 	
-	public static final InternalStorageManager getInternalInstance(Activity activity) {
+	public static final InternalStorageManager getInternalInstance(Context context) {
 		if (_internalInstance != null)
 			return _internalInstance;
-		_internalInstance = new InternalStorageManager(activity);
+		_internalInstance = new InternalStorageManager(context);
 		return _internalInstance;
 	}
 	
@@ -565,6 +566,7 @@ public class StorageManager {
 	private final File[] listHelper(final File root, final String extension) {
 		FileFilter ff = new FileFilter() {
 			@Override
+			@SuppressLint("DefaultLocale")
 			public boolean accept(File pathname) {
 				if (pathname.getName().toLowerCase().endsWith(extension))
 					return true;

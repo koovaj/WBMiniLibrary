@@ -15,28 +15,43 @@ import android.widget.TextView;
 
 public class AutoCompleteAdapter extends CursorAdapter implements Filterable, FilterQueryProvider {
 
-	private final AutoCompleteQueriable queriable;
-	private final CharSequence tag;
-	private String last; 
-	private MyClickListener myClickListener;
+	private final QueryListener mQueryListener;
+	private final CharSequence mTag; 
+	private final MyClickListener mClickListener;
+	private final ItemSelectedListener mItemSelectedListener;
+	private final int mCol;
+	private String mLastString;
 	
-	private AutoCompleteAdapter(Activity activity, Cursor cursor, AutoCompleteQueriable queriable, CharSequence tag) {
-		super(activity, cursor);
-		this.queriable = queriable;
-		this.tag = tag;
-		this.last = "";
-		setFilterQueryProvider(this);
-		this.myClickListener = new MyClickListener();
-		
+	public interface ItemSelectedListener {
+		public void onItemSelected(CharSequence text, CharSequence tag);
 	}
 	
-	public static AutoCompleteAdapter getInstance(Activity activity, AutoCompleteQueriable queriable, CharSequence tag) {
-		Cursor cursor = queriable.getAutoCompleteCursor("", tag);
-		return new AutoCompleteAdapter(activity, cursor, queriable, tag);
+	public interface QueryListener {
+		public Cursor getAutoCompleteCursor(CharSequence text, CharSequence tag);
+	}
+	
+	private AutoCompleteAdapter(Activity activity, Cursor cursor, QueryListener mQueryListener, CharSequence mTag, ItemSelectedListener itemSelectedListener, int col) {
+		super(activity, cursor);
+		this.mQueryListener = mQueryListener;
+		this.mTag = mTag;
+		this.mLastString = "";
+		setFilterQueryProvider(this);
+		this.mClickListener = new MyClickListener();
+		mItemSelectedListener = itemSelectedListener;
+		mCol = col;
+	}
+	
+	public static AutoCompleteAdapter getInstance(Activity activity, CharSequence mTag, QueryListener queryListener, ItemSelectedListener itemSelectedListener) {
+		return getInstance(activity, mTag, queryListener, itemSelectedListener, 0);
+	}
+	
+	public static AutoCompleteAdapter getInstance(Activity activity, CharSequence mTag, QueryListener queryListener, ItemSelectedListener itemSelectedListener, int col) {
+		Cursor cursor = queryListener.getAutoCompleteCursor("", mTag);
+		return new AutoCompleteAdapter(activity, cursor, queryListener, mTag, itemSelectedListener, col);
 	}
 	
 	public void reset() {
-		this.last = "";
+		this.mLastString = "";
 		onPause();
 	}
 	
@@ -49,9 +64,10 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable, Fi
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		String text = cursor.getString(0);
-		if (text.trim().equalsIgnoreCase(last.trim())) {
+		String text = cursor.getString(mCol);
+		if (text.trim().equalsIgnoreCase(mLastString.trim())) {
 			view.getRootView().setVisibility(View.INVISIBLE);
+			//TODO: Push on item selected...
 		}
 		else {
 			((TextView) view).setText(text);
@@ -62,33 +78,33 @@ public class AutoCompleteAdapter extends CursorAdapter implements Filterable, Fi
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		final LayoutInflater inflater = LayoutInflater.from(context);
-		if (parent instanceof ListView) { // Should always be the case (but to prevent against updates, etc)
-			((ListView) parent).setOnItemClickListener(myClickListener);
+		if (mItemSelectedListener != null && parent instanceof ListView) { // Should always be the case (but to prevent against updates, etc)
+			((ListView) parent).setOnItemClickListener(mClickListener);
 		}
         final TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
-        String item = cursor.getString(0);
+        String item = cursor.getString(mCol);
         view.setText(item);
         return view;
 	}
 	
 	@Override
 	public CharSequence convertToString(Cursor cursor) {
-		return cursor.getString(0);
+		return cursor.getString(mCol);
 	}
 	
 	private class MyClickListener implements AdapterView.OnItemClickListener {
 
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			queriable.onItemSelected(((TextView)view).getText(), tag);
+			mItemSelectedListener.onItemSelected(((TextView)view).getText(), mTag);
 		}
 		
 	}
 
 	@Override
 	public Cursor runQuery(CharSequence constraint) {
-		last = (constraint == null) ? "" : constraint.toString();
-        return queriable.getAutoCompleteCursor(last, tag);
+		mLastString = (constraint == null) ? "" : constraint.toString();
+        return mQueryListener.getAutoCompleteCursor(mLastString, mTag);
 	}
 
 }

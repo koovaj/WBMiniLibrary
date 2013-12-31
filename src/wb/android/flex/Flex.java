@@ -14,7 +14,7 @@ import org.xml.sax.XMLReader;
 
 import wb.android.storage.InternalStorageManager;
 import wb.android.storage.StorageManager;
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -35,25 +35,25 @@ public class Flex {
 	private static final String DEFAULT_FILENAME = "Flex.xml";
 	
 	private static Flex INSTANCE = null;
-	private Activity activity;
-	private LayoutInflater inflater;
-	private FlexViews flexViews;
-	private FlexStrings flexStrings;
+	private Context mContext;
+	private LayoutInflater mInflater;
+	private FlexViews mFlexViews;
+	private FlexStrings mFlexStrings;
 	
-	private Flex(Activity activity, Flexable flexable) {
-		this.activity = activity;
-		inflater = LayoutInflater.from(activity);
+	private Flex(Context context, Flexable flexable) {
+		this.mContext = context;
+		mInflater = LayoutInflater.from(context);
 		int rawID = flexable.getFleXML();
 		
 		//Try to find an old flex file
-		SharedPreferences prefs = activity.getSharedPreferences(FLEX_PREFERENCES, 0);
+		SharedPreferences prefs = context.getSharedPreferences(FLEX_PREFERENCES, 0);
     	String flexFilePath = prefs.getString(STRING_FLEX_FILE, "");
     	if (D) Log.d(TAG, flexFilePath);
     	
 		if (this.isFleXMLDefined(rawID)) {
-			InputStream is = activity.getResources().openRawResource(rawID);
-			this.parseFleXML(activity, is); //Since this InputStream gets closed here
-			is = activity.getResources().openRawResource(rawID);
+			InputStream is = context.getResources().openRawResource(rawID);
+			this.parseFleXML(is); //Since this InputStream gets closed here
+			is = context.getResources().openRawResource(rawID);
 			if (flexFilePath.length() > 0) { //A Flex file exists. Let's test if any updates have been applied
 				String rawHash = StorageManager.getMD5Checksum(is);
 				String flexHash = StorageManager.getMD5Checksum(new File(flexFilePath));
@@ -79,7 +79,7 @@ public class Flex {
 	    		FileInputStream fis = null;
 	    		try {
 	    			fis = new FileInputStream(flexFilePath);
-					this.parseFleXML(activity, fis);
+					this.parseFleXML(fis);
 					fis.close();
 				} 
 	    		catch (FileNotFoundException e) {
@@ -100,7 +100,7 @@ public class Flex {
 	}
 	
 	private final void writeFlexFileToSD(InputStream is, SharedPreferences prefs) {
-		InternalStorageManager internal = StorageManager.getInternalInstance(activity);
+		InternalStorageManager internal = StorageManager.getInternalInstance(mContext);
 		byte[] data = internal.read(is);
 		internal.write(DEFAULT_FILENAME, data);
 		File flexFile = internal.getFile(DEFAULT_FILENAME);
@@ -129,17 +129,17 @@ public class Flex {
 		
 	}
 	
-	public static final Flex getInstance(Activity activity, Flexable flexable) { //throws FlexFailedException {
+	public static final Flex getInstance(Context context, Flexable flexable) { //throws FlexFailedException {
 		if (INSTANCE != null) {
-			if (INSTANCE.activity != activity) //Our current activity has been changed or destroyed
-				INSTANCE = new Flex(activity, flexable);
+			if (INSTANCE.mContext != context) //Our current activity has been changed or destroyed
+				INSTANCE = new Flex(context, flexable);
 			return INSTANCE;
 		}
-		INSTANCE = new Flex(activity, flexable);
+		INSTANCE = new Flex(context, flexable);
 		return INSTANCE;
 	}
 		
-	private final void parseFleXML(Activity activity, InputStream is) {
+	private final void parseFleXML(InputStream is) {
 		try { 
 			SAXParserFactory spf = SAXParserFactory.newInstance(); 
 			SAXParser sp = spf.newSAXParser(); 
@@ -153,42 +153,42 @@ public class Flex {
 	}
 	
 	public String getString(int resId) {
-		String string = activity.getString(resId);
-		if (flexStrings == null) 
+		String string = mContext.getString(resId);
+		if (mFlexStrings == null) 
 			return string;
 		else {
-			String name = activity.getResources().getResourceEntryName(resId);
-			return flexStrings.update(string, name);		
+			String name = mContext.getResources().getResourceEntryName(resId);
+			return mFlexStrings.update(string, name);		
 		}
 	}
 	
 	public String[] getStringArray(int resID) {
-		return activity.getResources().getStringArray(resID);
+		return mContext.getResources().getStringArray(resID);
 	}
 	
 	public View getView(int layoutID) {
-    	return inflater.inflate(layoutID, null);
+    	return mInflater.inflate(layoutID, null);
 	}
 	
 	public View getSubView(View parent, int resId) {
 		View view = parent.findViewById(resId);
-		if (flexViews == null) return view;
-		String id = "@+id/" + activity.getResources().getResourceEntryName(resId);
+		if (mFlexViews == null) return view;
+		String id = "@+id/" + mContext.getResources().getResourceEntryName(resId);
 		if (view instanceof ViewGroup) {
 			ViewGroup group = (ViewGroup) view;
 			try {
-				flexViews.addFlexViewsToParent(activity, group, id);
+				mFlexViews.addFlexViewsToParent(mContext, group, id);
 			} catch (FlexFailedException e) {
 				Log.e(TAG, e.toString());
 			}
 		}
 		try {
 			if (view instanceof EditText)
-				flexViews.updateView((EditText)view, id);
+				mFlexViews.updateView((EditText)view, id);
 			else if (view instanceof CheckBox)
-				flexViews.updateView((CheckBox)view, id);
+				mFlexViews.updateView((CheckBox)view, id);
 			else
-				flexViews.updateView(view, id);
+				mFlexViews.updateView(view, id);
 		} catch (FlexFailedException e) {
 			Log.e(TAG, e.toString());
 		}
@@ -199,18 +199,18 @@ public class Flex {
 	public <T extends View> T getSubView(View parent, int resId, Class<T> viewClass) {
 		View view = parent.findViewById(resId);
 		T t = viewClass.cast(view);
-		if (flexViews == null) return viewClass.cast(view);
+		if (mFlexViews == null) return viewClass.cast(view);
 		if (view instanceof ViewGroup) {
 			ViewGroup group = (ViewGroup) view;
 			try {
-				flexViews.addFlexViewsToParent(activity, group);
+				mFlexViews.addFlexViewsToParent(activity, group);
 			} catch (FlexFailedException e) {
 				Log.e(TAG, e.toString());
 			}
 		}
 		try {
 			if (view instanceof EditText)
-				flexViews.updateView((EditText)t);
+				mFlexViews.updateView((EditText)t);
 		} catch (FlexFailedException e) {
 			e.printStackTrace();
 		}
@@ -218,11 +218,11 @@ public class Flex {
 	}*/
 	
 	void setFlexViews(FlexViews flexViews) {
-		this.flexViews = flexViews;
+		this.mFlexViews = flexViews;
 	}
 	
 	void setFlexStrings(FlexStrings flexStrings) {
-		this.flexStrings = flexStrings;
+		this.mFlexStrings = flexStrings;
 	}
 	
 	enum Element {

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 public class InternalStorageManager extends StorageManager {
@@ -12,12 +12,12 @@ public class InternalStorageManager extends StorageManager {
 	private static final String TAG = "InternalStorageManager";
 	private static final boolean D = false;
 	
-	private final Activity _activity;
+	private final Context mContext;
 	
-	protected InternalStorageManager(final Activity activity) {
-		super(activity.getFilesDir());
+	protected InternalStorageManager(Context context) {
+		super(context.getFilesDir());
 		if (D) Log.d(TAG, "Creating Internal SD Card"); 
-		_activity = activity;
+		mContext = context;
 	}
 	
 	public FileOutputStream getFOS(String filename, int mode) throws FileNotFoundException {
@@ -32,11 +32,11 @@ public class InternalStorageManager extends StorageManager {
 		String path = dir.toString();
 		if (!path.endsWith(File.separator))
 			path += File.separator;
-		return _activity.openFileOutput(filename, mode);
+		return mContext.openFileOutput(filename, mode);
 	}
 	
-	Activity getActivity() {
-		return _activity;
+	Context getContext() {
+		return mContext;
 	}
 	
 }

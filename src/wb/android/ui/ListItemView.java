@@ -1,6 +1,5 @@
 package wb.android.ui;
 
-import android.R;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.TypedValue;
@@ -12,13 +11,13 @@ import android.widget.TextView;
 public class ListItemView extends LinearLayout {
 
 	public static final LinearLayout.LayoutParams ICON_PARAMS = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-	public static final LinearLayout.LayoutParams TEXT_PARAMS = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+	public static final LinearLayout.LayoutParams TEXT_PARAMS = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 	
-	public ListItemView(final Context context, final String left, final int leftWidth, final String top, final String bottom) {
+	public ListItemView(Context context, String left, int leftWidth, String top, String bottom, int backgroundDrawableResId) {
 		super(context);
 		setOrientation(LinearLayout.HORIZONTAL);
 		setPadding(0, 6, 0, 6);
-		setBackgroundResource(R.drawable.list_selector_background);
+		setBackgroundResource(backgroundDrawableResId);
 		ICON_PARAMS.setMargins(6, 0, 6, 0);
 		
 		TextView leftText = new TextView(context);
@@ -50,11 +49,11 @@ public class ListItemView extends LinearLayout {
 		setGravity(Gravity.CENTER_VERTICAL);
 	}
 	
-	public ListItemView(final Context context, final String left, final String top, final String bottom) {
+	public ListItemView(Context context, String left, String top, String bottom, int backgroundDrawableResId) {
 		super(context);
 		setOrientation(LinearLayout.HORIZONTAL);
 		setPadding(0, 6, 0, 6);
-		setBackgroundResource(R.drawable.list_selector_background);
+		setBackgroundResource(backgroundDrawableResId);
 		ICON_PARAMS.setMargins(6, 0, 6, 0);
 		
 		TextView leftText = new TextView(context);
@@ -84,11 +83,11 @@ public class ListItemView extends LinearLayout {
 		setGravity(Gravity.CENTER_VERTICAL);
 	}
 	
-	public ListItemView(final Context context, final String top, final String bottom) {
+	public ListItemView(Context context, String top, String bottom, int backgroundDrawableResId) {
 		super(context);
 		setOrientation(LinearLayout.HORIZONTAL);
 		setPadding(0, 6, 0, 6);
-		setBackgroundResource(R.drawable.list_selector_background);
+		setBackgroundResource(backgroundDrawableResId);
 		ICON_PARAMS.setMargins(6, 0, 6, 0);
 		 
 		TextView topText = new TextView(context);
@@ -111,11 +110,11 @@ public class ListItemView extends LinearLayout {
 		setGravity(Gravity.CENTER_VERTICAL);
 	}
 	
-	public ListItemView(final Context context, final String text, final int drawableID) {
+	public ListItemView(Context context, String text, int drawableID, int backgroundDrawableResId) {
 		super(context);
 		setOrientation(LinearLayout.HORIZONTAL);
 		setPadding(0, 6, 0, 6);
-		setBackgroundResource(R.drawable.list_selector_background);
+		setBackgroundResource(backgroundDrawableResId);
 		ICON_PARAMS.setMargins(2, 0, 2, 0);
 		
 		ImageView icon = new ImageView(context);

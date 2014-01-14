@@ -24,6 +24,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
 //There are a lot of helper methods here to make sure that no functionality is lost if a method is overwritten
@@ -919,6 +920,25 @@ public class StorageManager {
 		}
 		else {
 			Log.d(TAG, indent + file.getName());
+		}
+	}
+	
+	/**
+	 * Returns the file extension. Returns null if the file is invalid (null, nameless, directory)
+	 * @param file - the file to get the extension from
+	 * @return the extension as a string
+	 */
+	public static final String getExtension(File file) {
+		if (file == null || TextUtils.isEmpty(file.getName()) || file.isDirectory()) {
+			return null;
+		}
+		String name = file.getName();
+		int index = name.lastIndexOf('.');
+		if (index == -1) {
+			return null;
+		}
+		else {
+			return name.substring(index + 1);
 		}
 	}
 		

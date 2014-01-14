@@ -34,15 +34,10 @@ public class Flex {
 	
 	private static final String DEFAULT_FILENAME = "Flex.xml";
 	
-	private static Flex INSTANCE = null;
-	private Context mContext;
-	private LayoutInflater mInflater;
 	private FlexViews mFlexViews;
 	private FlexStrings mFlexStrings;
 	
 	private Flex(Context context, Flexable flexable) {
-		this.mContext = context;
-		mInflater = LayoutInflater.from(context);
 		int rawID = flexable.getFleXML();
 		
 		//Try to find an old flex file
@@ -62,15 +57,15 @@ public class Flex {
 				if (rawHash != null && flexHash != null) {
 					if (!rawHash.equalsIgnoreCase(flexHash)) {
 						//It really should check that the file on Disk has a lesser version number, instead of just auto overwriting
-						writeFlexFileToSD(is, prefs);
+						writeFlexFileToSD(is, prefs, context);
 					}
 				}
 				else { //Something went wrong. Try writing the file again
-					writeFlexFileToSD(is, prefs);
+					writeFlexFileToSD(is, prefs, context);
 				}
 			}
 			else { //Write the new Flex File
-				writeFlexFileToSD(is, prefs);
+				writeFlexFileToSD(is, prefs, context);
 			}
 			try { if (is != null) is.close(); } catch (IOException e) { Log.e(TAG, e.toString()); }
 		}
@@ -99,8 +94,8 @@ public class Flex {
 		}
 	}
 	
-	private final void writeFlexFileToSD(InputStream is, SharedPreferences prefs) {
-		InternalStorageManager internal = StorageManager.getInternalInstance(mContext);
+	private final void writeFlexFileToSD(InputStream is, SharedPreferences prefs, Context context) {
+		InternalStorageManager internal = StorageManager.getInternalInstance(context);
 		byte[] data = internal.read(is);
 		internal.write(DEFAULT_FILENAME, data);
 		File flexFile = internal.getFile(DEFAULT_FILENAME);
@@ -130,13 +125,7 @@ public class Flex {
 	}
 	
 	public static final Flex getInstance(Context context, Flexable flexable) { //throws FlexFailedException {
-		if (INSTANCE != null) {
-			if (INSTANCE.mContext != context) //Our current activity has been changed or destroyed
-				INSTANCE = new Flex(context, flexable);
-			return INSTANCE;
-		}
-		INSTANCE = new Flex(context, flexable);
-		return INSTANCE;
+		return new Flex(context, flexable);
 	}
 		
 	private final void parseFleXML(InputStream is) {
@@ -152,32 +141,32 @@ public class Flex {
 		}
 	}
 	
-	public String getString(int resId) {
-		String string = mContext.getString(resId);
+	public String getString(Context context, int resId) {
+		String string = context.getString(resId);
 		if (mFlexStrings == null) 
 			return string;
 		else {
-			String name = mContext.getResources().getResourceEntryName(resId);
+			String name = context.getResources().getResourceEntryName(resId);
 			return mFlexStrings.update(string, name);		
 		}
 	}
 	
-	public String[] getStringArray(int resID) {
-		return mContext.getResources().getStringArray(resID);
+	public String[] getStringArray(Context context, int resID) {
+		return context.getResources().getStringArray(resID);
 	}
 	
-	public View getView(int layoutID) {
-    	return mInflater.inflate(layoutID, null);
+	public View getView(Context context, int layoutID) {
+    	return LayoutInflater.from(context).inflate(layoutID, null);
 	}
 	
-	public View getSubView(View parent, int resId) {
+	public View getSubView(Context context, View parent, int resId) {
 		View view = parent.findViewById(resId);
 		if (mFlexViews == null) return view;
-		String id = "@+id/" + mContext.getResources().getResourceEntryName(resId);
+		String id = "@+id/" + context.getResources().getResourceEntryName(resId);
 		if (view instanceof ViewGroup) {
 			ViewGroup group = (ViewGroup) view;
 			try {
-				mFlexViews.addFlexViewsToParent(mContext, group, id);
+				mFlexViews.addFlexViewsToParent(context, group, id);
 			} catch (FlexFailedException e) {
 				Log.e(TAG, e.toString());
 			}

@@ -60,6 +60,7 @@ public class AppRating {
 		        final SharedPreferences.Editor editor = prefs.edit();
 				final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 	    		builder.setTitle("Like " + mAppName + "?")
+	    			   .setMessage("Please consider leaving a review about it. As an independent developer, your reviews are my primary source of exposure and really help ti ecourage me to keep adding new features. Thanks!")
 	    			   .setCancelable(true)
 	    			   .setPositiveButton("Rate It Now", new DialogInterface.OnClickListener() {
 	    		           public void onClick(DialogInterface dialog, int id) {

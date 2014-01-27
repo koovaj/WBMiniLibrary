@@ -10,6 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
@@ -612,11 +615,13 @@ public class StorageManager {
 	}
 	
 	private final Bitmap getMutableMemoryEfficientBitmapHelper(File file, Bitmap.Config config, int maxDimension) {
+		FileInputStream fis = null;
 		try {
 			//Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream(new FileInputStream(file),null,o);
+			fis = new FileInputStream(file);
+			BitmapFactory.decodeStream(fis,null,o);
 			
 			int scale=1;
 			while(o.outWidth/scale/2>=maxDimension && o.outHeight/scale/2>=maxDimension)
@@ -633,6 +638,9 @@ public class StorageManager {
 		} 
 		catch (FileNotFoundException e) {
 			return null;
+		}
+		finally {
+			if (fis != null) StorageManager.closeQuietly(fis);
 		}
 	}
 	
@@ -941,5 +949,81 @@ public class StorageManager {
 			return name.substring(index + 1);
 		}
 	}
+	
+	//-----------------------------------------------------------------------
+	// Copied from Apache IO Utils
+	//-----------------------------------------------------------------------
+	
+    /**
+     * Unconditionally close an <code>Reader</code>.
+     * <p>
+     * Equivalent to {@link Reader#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     *
+     * @param input  the Reader to close, may be null or already closed
+     */
+    public static void closeQuietly(Reader input) {
+        try {
+            if (input != null) {
+                input.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+    /**
+     * Unconditionally close a <code>Writer</code>.
+     * <p>
+     * Equivalent to {@link Writer#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     *
+     * @param output  the Writer to close, may be null or already closed
+     */
+    public static void closeQuietly(Writer output) {
+        try {
+            if (output != null) {
+                output.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+    /**
+     * Unconditionally close an <code>InputStream</code>.
+     * <p>
+     * Equivalent to {@link InputStream#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     *
+     * @param input  the InputStream to close, may be null or already closed
+     */
+    public static void closeQuietly(InputStream input) {
+        try {
+            if (input != null) {
+                input.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+    /**
+     * Unconditionally close an <code>OutputStream</code>.
+     * <p>
+     * Equivalent to {@link OutputStream#close()}, except any exceptions will be ignored.
+     * This is typically used in finally blocks.
+     *
+     * @param output  the OutputStream to close, may be null or already closed
+     */
+    public static void closeQuietly(OutputStream output) {
+        try {
+            if (output != null) {
+                output.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
 		
 }

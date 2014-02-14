@@ -443,8 +443,6 @@ public class StorageManager {
 				while((read = fis.read(buffer)) != -1) {
 					fos.write(buffer, 0, read);
 				}
-				fis.close();
-				fos.close();
 			}
 			catch (IOException e) {
 				throw e;
